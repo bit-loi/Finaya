@@ -13,13 +13,13 @@ from google.genai import types
 class FinayaAgent:
     def __init__(self):
         self.api_key = settings.GEMINI_API_KEY
-        self.model_name = settings.GEMINI_MODEL or "gemini-2.0-flash"
+        self.model_name = settings.GEMINI_MODEL or "gemini-3-flash-preview"
         self.client = None
         self.legacy_client = None
         self.use_legacy = False
 
         if not self.api_key:
-            print("⚠️ GEMINI_API_KEY not found. Agent features will be disabled.")
+            print(" GEMINI_API_KEY not found. Agent features will be disabled.")
             return
 
         # Try initializing Google Gen AI SDK v0 (google.generativeai) first as it is more stable in this env
@@ -28,9 +28,9 @@ class FinayaAgent:
             genai.configure(api_key=self.api_key)
             self.legacy_client = genai.GenerativeModel(self.model_name)
             self.use_legacy = True
-            print("✅ Initialized Gemini using Legacy SDK (google.generativeai)")
+            print(" Initialized Gemini using Legacy SDK (google.generativeai)")
         except ImportError:
-            print("⚠️ Legacy SDK not found, trying new SDK...")
+            print(" Legacy SDK not found, trying new SDK...")
         except Exception as e:
             print(f"❌ Failed to initialize Legacy SDK: {e}")
 
@@ -39,7 +39,7 @@ class FinayaAgent:
             try:
                 from google import genai
                 self.client = genai.Client(api_key=self.api_key)
-                print("✅ Initialized Gemini using New SDK (google.genai)")
+                print(" Initialized Gemini using New SDK (google.genai)")
             except Exception as e:
                 print(f"❌ Failed to initialize New SDK: {e}")
                 print("❌ FinayaAgent logic will be disabled.")
