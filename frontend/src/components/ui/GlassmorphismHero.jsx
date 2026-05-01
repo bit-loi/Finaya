@@ -78,7 +78,7 @@ export default function GlassmorphismHero({ onGetStarted, onGuestLogin, isAuthen
 
             {/* Description */}
             <p className="animate-fade-in delay-300 max-w-xl text-lg text-zinc-400 leading-relaxed">
-              Make smarter location decisions with Google Gemini AI-powered geospatial analysis, profitability projections, and comprehensive market insights
+              Make smarter location decisions with Google Gemma 4 AI-powered geospatial analysis, profitability projections, and comprehensive market insights
             </p>
 
             {/* CTA Buttons */}
@@ -162,7 +162,7 @@ export default function GlassmorphismHero({ onGetStarted, onGuestLogin, isAuthen
                     LIVE
                   </div>
                   <div className="inline-flex items-center gap-1.5 rounded-full border border-yellow-400/20 bg-yellow-400/5 px-3 py-1 text-[10px] font-medium tracking-wide text-yellow-300">
-                    GOOGLE GEMINI
+                    GOOGLE GEMMA 4
                   </div>
                 </div>
               </div>

@@ -43,7 +43,7 @@ const BusinessAnalysisApp = () => {
     currentStep: 0,
     steps: [
       { id: 1, name: 'Capture Screenshot', status: 'pending', detail: 'Capturing screenshot of selected area...', image: null },
-      { id: 2, name: 'Send to Gemini AI', status: 'pending', detail: 'Sending image to Gemini AI...', image: null },
+      { id: 2, name: 'Send to Gemma 4 AI', status: 'pending', detail: 'Sending image to Gemma 4 AI...', image: null },
       { id: 3, name: 'AI Color Analysis', status: 'pending', detail: 'AI analyzing color distribution...', data: null },
       { id: 4, name: 'Competitor Scan', status: 'pending', detail: 'Scanning nearby businesses via Places API...', data: null }, // <--- New Step
       { id: 5, name: 'Area Calculation', status: 'pending', detail: 'Calculating area from screenshot dimensions...', data: null },

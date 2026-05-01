@@ -167,7 +167,7 @@ export default function Home({ login, register, guestLogin, isAuthenticated }) {
     {
       icon: <Brain className="w-8 h-8" />,
       title: 'AI-Powered Location Analysis',
-      description: 'Advanced geospatial analysis using Google Gemini AI to evaluate business locations based on demographics, competition, and foot traffic patterns',
+      description: 'Advanced geospatial analysis using Google Gemma 4 AI to evaluate business locations based on demographics, competition, and foot traffic patterns',
     },
     {
       icon: <Target className="w-8 h-8" />,
@@ -185,7 +185,7 @@ export default function Home({ login, register, guestLogin, isAuthenticated }) {
     { number: "82%", label: "Businesses fail due to poor location choice", icon: <Target className="h-8 w-8" /> },
     { number: "3x", label: "Higher success rate with location analysis", icon: <TrendingUp className="h-8 w-8" /> },
     { number: "50+", label: "Data points analyzed per location", icon: <Zap className="h-8 w-8" /> },
-    { number: "AI", label: "Powered by Google Gemini", icon: <Brain className="h-8 w-8" /> }
+    { number: "AI", label: "Powered by Google Gemma 4", icon: <Brain className="h-8 w-8" /> }
   ];
 
   const countries = [
@@ -328,7 +328,7 @@ export default function Home({ login, register, guestLogin, isAuthenticated }) {
                   <h3 className="text-base font-bold text-white">AI Analysis</h3>
                 </div>
                 <p className="text-sm text-zinc-400 leading-relaxed">
-                  Google Gemini AI analyzes demographics, competition, foot traffic, and market potential
+                  Google Gemma 4 AI analyzes demographics, competition, foot traffic, and market potential
                 </p>
               </div>
             </div>

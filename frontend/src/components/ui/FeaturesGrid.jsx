@@ -10,7 +10,7 @@ export default function FeaturesGrid() {
     {
       icon: Brain,
       title: 'AI Analysis',
-      description: 'Google Gemini AI analyzes demographics, competition, foot traffic, and market potential'
+      description: 'Google Gemma 4 AI analyzes demographics, competition, foot traffic, and market potential'
     },
     {
       icon: BarChart3,

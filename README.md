@@ -1,10 +1,10 @@
 # Finaya - Agentic AI Business Location Consultant
 
-> **Built for Google Gemini Hackathon**  
+> **Powered by Google Gemma 4**  
 > Finaya is an autonomous AI agent that scouts, reasons, and advises on business locations. It doesn't just show data; it thinks through complex geospatial patterns to project profitability.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Google Gemini](https://img.shields.io/badge/Powered%20by-Google%20Gemini-4285F4?logo=google)](https://ai.google.dev/)
+[![Google Gemma 4](https://img.shields.io/badge/Powered%20by-Google%20Gemma%204-4285F4?logo=google)](https://ai.google.dev/)
 [![Interactive Maps](https://img.shields.io/badge/Maps-Interactive-E60012)](https://ai.google.dev/)
 
 ## Table of Contents
@@ -22,9 +22,9 @@
 
 ## Overview
 
-**Finaya** is an intelligent geospatial analysis platform that helps businesses make data-driven location decisions. By leveraging Google Gemini AI's multimodal capabilities and comprehensive geospatial data, Finaya analyzes potential business locations and provides detailed profitability projections.
+**Finaya** is an intelligent geospatial analysis platform that helps businesses make data-driven location decisions. By leveraging Google Gemma 4 AI's multimodal capabilities and comprehensive geospatial data, Finaya analyzes potential business locations and provides detailed profitability projections.
 
-Unlike traditional map-based analysis tools, Finaya does not rely solely on visual interpretation. It combines Gemini multimodal analysis with a probabilistic traffic flow model, weather impact modeling (VIC), and geospatial mathematics to simulate how people realistically move through roads and junctions before calculating revenue projections.
+Unlike traditional map-based analysis tools, Finaya does not rely solely on visual interpretation. It combines Gemma 4 multimodal analysis with a probabilistic traffic flow model, weather impact modeling (VIC), and geospatial mathematics to simulate how people realistically move through roads and junctions before calculating revenue projections.
 
 ### The Problem
 
@@ -35,7 +35,7 @@ Unlike traditional map-based analysis tools, Finaya does not rely solely on visu
 ### Our Solution
 
 Finaya provides:
-- **AI-powered location analysis** using Google Gemini's vision capabilities
+- **AI-powered location analysis** using Google Gemma 4's vision capabilities
 - **Real-time profitability calculations** based on geospatial data
 - **Interactive map visualization** with advanced geospatial data
 - **Comprehensive business metrics** including revenue projections and ROI estimates
@@ -43,7 +43,7 @@ Finaya provides:
 ## Key Features
 
 ### Agentic AI Capabilities
-- **Autonomous Reasoning (Deep Think)**: Gemini AI processes map data with step-by-step reasoning (Chain-of-Thought) to ensure high-accuracy profitability projections.
+- **Autonomous Reasoning (Deep Think)**: Gemma 4 AI processes map data with step-by-step reasoning (Chain-of-Thought) to ensure high-accuracy profitability projections.
 - **AI Business Advisor**: Real-time agentic consultant to answer strategic questions about ROI, competition, and business model pivots.
 - **Autonomous Exploration**: Agent scouts for 'golden locations' within a radius to maximize business potential.
 - **Contextual Memory**: Remembers analysis history to compare locations with deep semantic understanding.
@@ -97,7 +97,7 @@ Finaya introduces a custom mathematical engine that simulates real human movemen
 
 ### Backend
 - **Framework**: FastAPI (Python)
-- **AI Integration**: Google Gemini Multimodal (Vision) API
+- **AI Integration**: Google Gemma 4 Multimodal (Vision) API
 - **Traffic Engine**: Probabilistic junction-based traffic simulation
 - **Weather Engine**: Visitor Impact Coefficient (VIC) modeling
 - **Database**: Firebase Firestore (NoSQL)
@@ -149,7 +149,7 @@ Finaya introduces a custom mathematical engine that simulates real human movemen
             ▼               ▼               ▼               ▼
     ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐
     │  Google  │    │ Firebase │    │  Redis   │    │ Traffic & │
-    │  Gemini  │    │Firestore │    │  Cache   │    │ Weather   │
+    │ Gemma 4  │    │Firestore │    │  Cache   │    │ Weather   │
     └──────────┘    └──────────┘    └──────────┘    └──────────┘
 ```
 
@@ -161,7 +161,7 @@ Finaya introduces a custom mathematical engine that simulates real human movemen
 - **Python** 3.9+
 - **Redis** (for rate limiting)
 - **Firebase Account** (for database and authentication)
-- **Google Gemini API Key** (Google AI Studio)
+- **Google Gemma 4 API Key** (Google AI Studio)
 - **Maps API Key** (for geospatial services)
 
 ### Installation
@@ -213,7 +213,7 @@ FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
 # JWT Secret
 SECRET_KEY=your_secret_key_here
 
-# Google Gemini Vision API
+# Google Gemma 4 Vision API
 GEMINI_API_KEY=your_gemini_api_key
 GEMINI_MODEL=gemini-3-flash
 
@@ -353,7 +353,7 @@ service cloud.firestore {
 ### 4. Analyze Location
 
 - Click "Analyze Location"
-- Google Gemini AI analyzes the map screenshot to extract area distribution, which is then processed by Finaya’s traffic and weather engine to simulate realistic visitor flow before calculating revenue.
+- Google Gemma 4 AI analyzes the map screenshot to extract area distribution, which is then processed by Finaya’s traffic and weather engine to simulate realistic visitor flow before calculating revenue.
 - View comprehensive results including:
   - Area distribution (residential, roads, open spaces)
   - Population estimates
@@ -472,7 +472,7 @@ finaya/
 │   │   │   ├── BusinessAnalysisApp.jsx
 │   │   │   ├── CurrencySelector.jsx
 │   │   │   ├── Footer.jsx
-│   │   │   ├── MapComponent.jsx
+1:   │   │   ├── MapComponent.jsx
 │   │   │   ├── Navbar.jsx
 │   │   │   ├── ProgressPanel.jsx
 │   │   │   └── ResultsPanel.jsx
@@ -522,7 +522,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Acknowledgments
 
-- **Google Gemini** for providing powerful multimodal AI capabilities
+- **Google Gemma 4** for providing powerful multimodal AI capabilities
 - **Cloud Infrastructure** for high-performance hosting and mapping services
 - **Firebase** for database and authentication services
 - **OpenStreetMap** for geocoding services
@@ -534,6 +534,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-**Built with care for Google Gemini 3 Hackathon**
+**Built with care for Google Gemma 4**
 
 Making business location decisions smarter, one analysis at a time.
