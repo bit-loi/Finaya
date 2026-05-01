@@ -213,9 +213,9 @@ FIREBASE_STORAGE_BUCKET=your_project_id.appspot.com
 # JWT Secret
 SECRET_KEY=your_secret_key_here
 
-# Google Gemma 4 Vision API
+# Google Gemma 4 via Gemini API
 GEMINI_API_KEY=your_gemini_api_key
-GEMINI_MODEL=gemini-3-flash
+GEMINI_MODEL=gemma-4-26b-a4b-it
 
 # Redis (for rate limiting)
 REDIS_URL=redis://localhost:6379

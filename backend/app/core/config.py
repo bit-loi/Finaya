@@ -23,9 +23,9 @@ class Settings(BaseSettings):
     FIREBASE_CLIENT_CERT_URL: str = ""
     FIREBASE_STORAGE_BUCKET: str = ""
 
-    # Google Gemini API
+    # Google Gemma 4 / Gemini API
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-3-flash-preview"  # Updated default
+    GEMINI_MODEL: str = "gemma-4-26b-a4b-it"  # Gemma 4 via Gemini API
     GOOGLE_MAPS_API_KEY: str = "" # Optional, if using Places API
     GOOGLE_SEARCH_API_KEY: str = "" # Custom Search JSON API Key
     GOOGLE_SEARCH_CX: str = ""      # Programmable Search Engine ID

@@ -17,42 +17,60 @@ L.Icon.Default.mergeOptions({
   shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 });
 
-// Create a custom red marker icon for selected locations
-const redMarkerIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+// A premium golden/yellow glowing marker icon for target locations
+const redMarkerIcon = L.divIcon({
+  className: 'custom-leaflet-marker-red',
+  html: `
+    <div style="position: relative; display: flex; justify-content: center; align-items: center; width: 36px; height: 36px;">
+      <div style="position: absolute; width: 32px; height: 32px; border-radius: 50%; background: #f59e0b; opacity: 0.4; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
+      <div style="position: relative; width: 18px; height: 18px; border-radius: 50%; background: #f59e0b; border: 3px solid #fff; box-shadow: 0 0 8px rgba(0,0,0,0.4);"></div>
+    </div>
+  `,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -18]
 });
 
-// Create a custom blue marker icon for user's current location
-const blueMarkerIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-blue.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+// Neon blue marker icon for user's current location
+const blueMarkerIcon = L.divIcon({
+  className: 'custom-leaflet-marker-blue',
+  html: `
+    <div style="position: relative; display: flex; justify-content: center; align-items: center; width: 36px; height: 36px;">
+      <div style="position: absolute; width: 32px; height: 32px; border-radius: 50%; background: #3b82f6; opacity: 0.4; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
+      <div style="position: relative; width: 18px; height: 18px; border-radius: 50%; background: #3b82f6; border: 3px solid #fff; box-shadow: 0 0 8px rgba(0,0,0,0.4);"></div>
+    </div>
+  `,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -18]
 });
 
-const greenMarkerIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+// Emerald green marker icon for premium competitors
+const greenMarkerIcon = L.divIcon({
+  className: 'custom-leaflet-marker-green',
+  html: `
+    <div style="position: relative; display: flex; justify-content: center; align-items: center; width: 36px; height: 36px;">
+      <div style="position: absolute; width: 28px; height: 28px; border-radius: 50%; background: #10b981; opacity: 0.4; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
+      <div style="position: relative; width: 16px; height: 16px; border-radius: 50%; background: #10b981; border: 3px solid #fff; box-shadow: 0 0 6px rgba(0,0,0,0.4);"></div>
+    </div>
+  `,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -18]
 });
 
-const goldMarkerIcon = new L.Icon({
-  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-gold.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png',
-  iconSize: [25, 41],
-  iconAnchor: [12, 41],
-  popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+// Subtle orange/gold for other competitors
+const goldMarkerIcon = L.divIcon({
+  className: 'custom-leaflet-marker-gold',
+  html: `
+    <div style="position: relative; display: flex; justify-content: center; align-items: center; width: 36px; height: 36px;">
+      <div style="position: absolute; width: 28px; height: 28px; border-radius: 50%; background: #f59e0b; opacity: 0.4; animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;"></div>
+      <div style="position: relative; width: 16px; height: 16px; border-radius: 50%; background: #f59e0b; border: 3px solid #fff; box-shadow: 0 0 6px rgba(0,0,0,0.4);"></div>
+    </div>
+  `,
+  iconSize: [36, 36],
+  iconAnchor: [18, 18],
+  popupAnchor: [0, -18]
 });
 
 /**
@@ -100,6 +118,51 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
   const circleRef = useRef(null);
+
+  // Inject marker styles for animation and popup styling
+  useEffect(() => {
+    let style = document.getElementById('leaflet-custom-marker-styles');
+    if (!style) {
+      style = document.createElement('style');
+      style.id = 'leaflet-custom-marker-styles';
+      document.head.appendChild(style);
+    }
+    style.innerHTML = `
+      @keyframes pulse {
+        0%, 100% {
+          transform: scale(0.95);
+          opacity: 0.3;
+        }
+        50% {
+          transform: scale(1.2);
+          opacity: 0.7;
+        }
+      }
+      .leaflet-div-icon {
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+      }
+      .leaflet-popup-content-wrapper {
+        background: #000000 !important;
+        color: #ffffff !important;
+        border: 1px solid #333333 !important;
+        border-radius: 6px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+        padding: 0 !important;
+      }
+      .leaflet-popup-tip {
+        background: #000000 !important;
+        border: 1px solid #333333 !important;
+      }
+      .leaflet-popup-content {
+        margin: 0 !important;
+        padding: 0 !important;
+        background: #000000 !important;
+        color: #ffffff !important;
+      }
+    `;
+  }, []);
 
   // Get user's current location (non-blocking)
   const getUserLocation = () => {
@@ -193,10 +256,18 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
             // Update map center to user's location
             map.setView([userLocation.lat, userLocation.lng], zoomLevel);
 
-            // Add red marker for user's current location
-            L.marker([userLocation.lat, userLocation.lng], { icon: redMarkerIcon })
+            // Add blue marker for user's current location
+            L.marker([userLocation.lat, userLocation.lng], { icon: blueMarkerIcon })
               .addTo(map)
-              .bindPopup(`📍 Your Current Location<br/>Lat: ${userLocation.lat.toFixed(6)}<br/>Lng: ${userLocation.lng.toFixed(6)}`)
+              .bindPopup(`
+                <div style="background: #000000; color: #ffffff; padding: 12px; border-radius: 6px; font-family: 'Inter', sans-serif; line-height: 1.4; border: 1px solid #333333; min-width: 160px;">
+                  <strong style="color: #ffffff; font-size: 13px; display: block; margin-bottom: 4px;">Your Current Location</strong>
+                  <div style="font-size: 11px; color: #a3a3a3; display: flex; flex-direction: column; gap: 2px;">
+                    <div>Lat: <span style="color: #ffffff; font-family: monospace;">${userLocation.lat.toFixed(6)}</span></div>
+                    <div>Lng: <span style="color: #ffffff; font-family: monospace;">${userLocation.lng.toFixed(6)}</span></div>
+                  </div>
+                </div>
+              `)
               .openPopup();
           })
           .catch((error) => {
@@ -206,9 +277,9 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
         console.log('Adding map layer...');
 
         // Define Base Layers
-        const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        const streetLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
           maxZoom: 19,
-          attribution: '&copy; OpenStreetMap'
+          attribution: '&copy; OpenStreetMap contributors &copy; CARTO'
         });
 
         const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
@@ -221,7 +292,7 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
 
         // Add Layer Control (Switch betweeen Street & Satellite)
         const baseMaps = {
-          "Street View": streetLayer,
+          "Carto Street": streetLayer,
           "Satellite View": satelliteLayer
         };
 
@@ -257,7 +328,15 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
           // Add red marker for selected location
           L.marker([lat, lng], { icon: redMarkerIcon })
             .addTo(map)
-            .bindPopup(`📍 Selected Location<br/>Lat: ${lat.toFixed(6)}<br/>Lng: ${lng.toFixed(6)}`)
+            .bindPopup(`
+              <div style="background: #000000; color: #ffffff; padding: 12px; border-radius: 6px; font-family: 'Inter', sans-serif; line-height: 1.4; border: 1px solid #333333; min-width: 160px;">
+                <strong style="color: #ffffff; font-size: 13px; display: block; margin-bottom: 4px;">Selected Location</strong>
+                <div style="font-size: 11px; color: #a3a3a3; display: flex; flex-direction: column; gap: 2px;">
+                  <div>Lat: <span style="color: #ffffff; font-family: monospace;">${lat.toFixed(6)}</span></div>
+                  <div>Lng: <span style="color: #ffffff; font-family: monospace;">${lng.toFixed(6)}</span></div>
+                </div>
+              </div>
+            `)
             .openPopup();
         });
 
@@ -362,16 +441,16 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
       L.marker([selectedLocation.lat, selectedLocation.lng], { icon: redMarkerIcon })
         .addTo(mapInstanceRef.current)
         .bindPopup(`
-            <div style="background-color: #0a0a0a; color: #fff; padding: 12px; border-radius: 8px; border: 1px solid #fbbf24; min-width: 220px; font-family: 'Inter', sans-serif;">
-              <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #fbbf24; display: flex; align-items: center; gap: 6px; padding-right: 24px;">
+            <div style="background-color: #000000; color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #333333; min-width: 220px; font-family: 'Inter', sans-serif;">
+              <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #ffffff; display: flex; align-items: center; gap: 6px; padding-right: 24px;">
                  Target Location
               </h3>
-              <div style="font-size: 11px; color: #a3a3a3; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #262626; padding-top: 8px;">
+              <div style="font-size: 11px; color: #a3a3a3; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #333333; padding-top: 8px;">
                 <div style="display: flex; justify-content: space-between;">
-                  <span>Lat:</span> <span style="color: #e5e5e5; font-family: monospace;">${selectedLocation.lat.toFixed(6)}</span>
+                  <span>Lat:</span> <span style="color: #ffffff; font-family: monospace;">${selectedLocation.lat.toFixed(6)}</span>
                 </div>
                 <div style="display: flex; justify-content: space-between;">
-                  <span>Lng:</span> <span style="color: #e5e5e5; font-family: monospace;">${selectedLocation.lng.toFixed(6)}</span>
+                  <span>Lng:</span> <span style="color: #ffffff; font-family: monospace;">${selectedLocation.lng.toFixed(6)}</span>
                 </div>
               </div>
             </div>
@@ -419,11 +498,11 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
         const marker = L.marker([comp.lat, comp.lng], { icon })
           .addTo(mapInstanceRef.current)
           .bindPopup(`
-            <div style="background-color: #0a0a0a; color: #fff; padding: 12px; border-radius: 8px; border: 1px solid #333; min-width: 220px; font-family: 'Inter', sans-serif;">
-              <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #fbbf24; line-height: 1.4; padding-right: 24px;">${comp.name}</h3>
+            <div style="background-color: #000000; color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #333333; min-width: 220px; font-family: 'Inter', sans-serif;">
+              <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #ffffff; line-height: 1.4; padding-right: 24px;">${comp.name}</h3>
               <div style="display: flex; gap: 12px; margin-bottom: 6px;">
                 <div style="font-size: 12px; color: #e5e5e5; display: flex; align-items: center; gap: 4px;">
-                  <span style="color: #fbbf24;">★</span> 
+                  <span style="color: #f59e0b;">Rating</span> 
                   <span>${comp.rating > 0 ? comp.rating : 'N/A'}</span>
                   <span style="color: #737373; font-size: 10px;">(${comp.user_ratings_total})</span>
                 </div>
@@ -431,7 +510,7 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
                   ${'$'.repeat(comp.price_level || 1)}
                 </div>
               </div>
-              <div style="font-size: 11px; color: #a3a3a3; margin-top: 8px; border-top: 1px solid #262626; padding-top: 8px; line-height: 1.4;">
+              <div style="font-size: 11px; color: #a3a3a3; margin-top: 8px; border-top: 1px solid #333333; padding-top: 8px; line-height: 1.4;">
                 ${comp.vicinity || 'Address not available'}
               </div>
             </div>

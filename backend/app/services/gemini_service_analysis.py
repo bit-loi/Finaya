@@ -2,7 +2,6 @@ import json
 import re
 import base64
 import httpx
-import google.generativeai as genai
 from typing import Dict, Any
 from fastapi import HTTPException
 
@@ -10,8 +9,6 @@ from app.core.config import settings
 from app.schemas.schemas import AreaDistribution
 from app.services.traffic_probability import probabilistic_traffic
 from app.services.weather_probability import apply_weather_to_apt
-
-genai.configure(api_key=settings.GEMINI_API_KEY)
 
 NOMINATIM_BASE_URL = "https://nominatim.openstreetmap.org/reverse"
 
@@ -88,18 +85,23 @@ async def analyze_location_image(
     You are an urban planner and business analyst.
     
     TASK:
-    1. Analyze the satellite image provided.
-    2. Cross-reference with this external data about {location_name}:
+    1. Analyze the map screenshot image provided.
+    2. Note on Map Styling: The screenshot uses modern Carto Style (CartoDB Voyager). Use these color cues:
+       - Residential areas/buildings: light cream or pale gray blocks, often with distinct brown/grey roof structures or footprints.
+       - Road networks: distinct white, pale grey, or light orange strips.
+       - Open spaces/parks: soft light green or open fields.
+       - Water bodies: soft blue or teal.
+    3. Cross-reference with this external data about {location_name}:
     "{search_context}"
     
     OUTPUT JSON ONLY:
     {{
-      "residential_percentage": number (0-100, estimate from roof density),
+      "residential_percentage": number (0-100, estimate from roof/building density),
       "road_percentage": number (0-100),
       "open_space_percentage": number (0-100),
       "estimated_population_density": number (people/km2. PRIORITY: Use valid number from Search Context if found. If not, estimate visually),
       "competitor_density_estimate": "low|medium|high",
-      "reasoning": "Explain how you calculated density based on the search data vs visual."
+      "reasoning": "Explain how you calculated density based on the search data vs Carto map style visual cues."
     }}
     """
 
