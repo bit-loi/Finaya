@@ -529,8 +529,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## Contact
 
-- **Project Link**: [https://github.com/yourusername/finaya](https://github.com/yourusername/finaya)
-- **Email**: your.email@example.com
+- **Project Link**: [https://github.com/yourusername/finaya](https://github.com/bit-loi/finaya)
+- **Email**: jasonbrandonloi03@gmail.com
 
 ---
 
