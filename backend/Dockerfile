@@ -2,10 +2,12 @@ FROM python:3.10-slim
 
 WORKDIR /app/backend
 
-RUN apt-get update && apt-get install -y gcc && rm -rf /var/lib/apt/lists/*
-
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+
+RUN apt-get update && apt-get install -y --no-install-recommends gcc \
+    && pip install --no-cache-dir -r requirements.txt \
+    && apt-get purge -y --auto-remove gcc \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY . .
 
