@@ -1,4 +1,4 @@
-import random
+from secrets import randbelow
 import httpx
 
 WEATHER_VIC = {
@@ -12,6 +12,20 @@ WEATHER_VIC = {
 # Fallback values
 WEATHER_STATES = ["clear", "light_rain", "heavy_rain", "cloudy", "storm"]
 WEATHER_PROBS = [0.4, 0.3, 0.15, 0.1, 0.05]
+
+
+def weighted_weather_choice() -> str:
+    """Choose a fallback weather state using OS-backed randomness."""
+    total = sum(int(prob * 100) for prob in WEATHER_PROBS)
+    pick = randbelow(total)
+    cumulative = 0
+
+    for weather, probability in zip(WEATHER_STATES, WEATHER_PROBS):
+        cumulative += int(probability * 100)
+        if pick < cumulative:
+            return weather
+
+    return WEATHER_STATES[0]
 
 def get_wmo_weather_state(wmo_code: int) -> str:
     """Map WMO codes to our weather states"""
@@ -46,14 +60,14 @@ def get_real_weather(lat: float, lng: float) -> str:
     except Exception as e:
         print(f"Weather API failed: {e}, using fallback.")
     
-    return random.choices(WEATHER_STATES, WEATHER_PROBS)[0]
+    return weighted_weather_choice()
 
 def apply_weather_to_apt(apt: float, lat: float = None, lng: float = None) -> tuple:
     if lat and lng:
         weather = get_real_weather(lat, lng)
     else:
-        # Fallback to random if no coordinates provided
-        weather = random.choices(WEATHER_STATES, WEATHER_PROBS)[0]
+        # Fallback if no coordinates are provided.
+        weather = weighted_weather_choice()
     
     vic = WEATHER_VIC.get(weather, 1.0)
     return apt * vic, weather

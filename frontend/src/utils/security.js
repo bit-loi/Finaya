@@ -2,8 +2,8 @@ export const ALLOWED_DOMAINS = [
   'localhost',
   '127.0.0.1',
   'finaya.app',
-  window.location.hostname
-];
+  globalThis.window?.location?.hostname
+].filter(Boolean);
 
 /**
  * Validates if a URL is safe for redirection.
@@ -33,9 +33,27 @@ export const isSafeRedirect = (url) => {
  */
 export const safeRedirect = (url) => {
   if (isSafeRedirect(url)) {
-    window.location.href = url;
+    const target = new URL(url, window.location.origin);
+
+    if (target.origin === window.location.origin) {
+      window.history.pushState({}, '', `${target.pathname}${target.search}${target.hash}`);
+      const event = typeof PopStateEvent === 'function' ? new PopStateEvent('popstate') : new Event('popstate');
+      window.dispatchEvent(event);
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = encodeURI(target.href);
+    link.rel = 'noopener noreferrer';
+    link.target = '_self';
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   } else {
     console.warn(`Blocked unsafe redirect to: ${url}`);
-    window.location.href = '/';
+    window.history.pushState({}, '', '/');
+    const event = typeof PopStateEvent === 'function' ? new PopStateEvent('popstate') : new Event('popstate');
+    window.dispatchEvent(event);
   }
 };

@@ -1,22 +1,19 @@
-from fastapi import FastAPI, HTTPException, Depends, status
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from contextlib import asynccontextmanager
 import uvicorn
 import logging
+import os
 
 from app.core.config import settings
 from app.core.database import init_db
-from app.core.dependencies import container, container_context
+from app.core.dependencies import container
 from app.core.ratelimiter import rate_limiter, rate_limit_exceeded_handler  
 from app.api.v1.auth import router as auth_router
 from app.api.v1.analysis import router as analysis_router
-from app.core.middleware import RequestLoggingMiddleware, OptionsMiddleware
+from app.core.middleware import OptionsMiddleware
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-
-# Security
-security = HTTPBearer()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -127,7 +124,7 @@ async def root():
 if __name__ == "__main__":
     uvicorn.run(
         "main:app",
-        host="0.0.0.0",
+        host=os.getenv("FINAYA_BIND_HOST", "127.0.0.1"),
         port=8000,
         reload=True,
         log_level="info"

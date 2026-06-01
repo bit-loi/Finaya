@@ -1,12 +1,11 @@
 from typing import Dict, Optional
+from hmac import compare_digest
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from ...schemas.schemas import UserCreate, User, Token, FirebaseLogin
 from ...services.user_service import UserService
-from ...core.security import SecurityManager
 from ...core.exceptions import AuthenticationError, ValidationError, DatabaseError
 
-router = APIRouter()
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login", auto_error=False)
 
@@ -15,7 +14,7 @@ ACCESS_TOKEN_EXPIRE_MINUTES = 30
 async def get_current_user_optional(token: Optional[str] = Depends(oauth2_scheme)) -> Optional[User]:
     """Get current user information if available, otherwise return None"""
     print(f"DEBUG: get_current_user_optional called. Token: {token}")  # Added debug logging
-    if not token or token == 'guest-token':
+    if not token or compare_digest(token, 'guest-token'):
         print("DEBUG: Token is missing or guest-token. Returning None.")
         return None
     
@@ -152,15 +151,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
             from ...repositories.user_repository import UserRepository
             repo = UserRepository()
             
-            # Create a dummy password hash just to satisfy DB constraints if any
-            # In a pure Firebase setup, we might not even need this column
-            import secrets
-            # We don't need robust hashing here since it's never used for login
-            dummy_hash = "firebase_managed_user" 
-            
             db_user = await repo.create_user(
                 email=email,
-                password_hash=dummy_hash,
                 full_name=name,
                 uid=uid
             )

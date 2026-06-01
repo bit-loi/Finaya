@@ -48,20 +48,25 @@ const ChartStyle = ({ id, config }) => {
     return null
   }
 
+  const css = colorConfig.map(([key, item]) => {
+    const color = item.theme || item.color
+    const safeKey = String(key).replace(/[^a-zA-Z0-9_-]/g, "")
+    const safeId = String(id).replace(/[^a-zA-Z0-9_-]/g, "")
+
+    if (!safeKey || !safeId || typeof color !== "string") {
+      return ""
+    }
+
+    const canValidateCss = typeof CSS !== "undefined" && CSS.supports
+    if (canValidateCss && !CSS.supports("color", color)) {
+      return ""
+    }
+
+    return `[data-chart="${safeId}"] { --color-${safeKey}: ${color}; }`
+  }).join("\n")
+
   return (
-    <style dangerouslySetInnerHTML={{ __html: Object.entries(config).map(([key, item]) => {
-        const color = item.theme || item.color
-        
-        if (color) {
-            return `
-            [data-chart=${id}] {
-              --color-${key}: ${color};
-            }
-          `
-        }
-        return ""
-      }).join("\n") }} 
-    />
+    <style>{css}</style>
   )
 }
 

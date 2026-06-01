@@ -1,8 +1,6 @@
 """
 Custom exceptions for the application
 """
-from typing import Optional
-
 
 class FinayaException(Exception):
     """Base exception for Finaya application"""

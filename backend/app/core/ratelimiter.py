@@ -3,10 +3,9 @@ from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
 from starlette.responses import JSONResponse
-from fastapi import Request, HTTPException
+from fastapi import Request
 from redis.asyncio import Redis
 from contextlib import asynccontextmanager
-from typing import Optional, Callable
 import logging
 import asyncio
 

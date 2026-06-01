@@ -6,6 +6,22 @@
 const GUEST_STORAGE_KEY = 'finaya_guest_analyses';
 const MAX_GUEST_ANALYSES = 10; // Limit to prevent localStorage overflow
 
+const createGuestId = () => {
+  const cryptoApi = globalThis.crypto;
+
+  if (cryptoApi?.randomUUID) {
+    return `guest_${cryptoApi.randomUUID()}`;
+  }
+
+  if (cryptoApi?.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    cryptoApi.getRandomValues(bytes);
+    return `guest_${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+  }
+
+  return `guest_${Date.now()}`;
+};
+
 /**
  * Save an analysis for guest user
  * @param {Object} analysisData - Analysis data to save
@@ -17,7 +33,7 @@ export const saveGuestAnalysis = (analysisData) => {
     
     // Generate a unique ID
     const newAnalysis = {
-      id: `guest_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      id: createGuestId(),
       ...analysisData,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

@@ -12,9 +12,23 @@ import App from "./pages/App";
 import Home from "./pages/Home";
 import { authAPI } from "./services/api";
 import { firebaseAuth } from "./services/firebase";
+import { safeRedirect } from "./utils/security";
 import { CurrencyProvider } from "./contexts/CurrencyContext";
 import Dashboard from "./pages/Dashboard";
 import "../index.css";
+
+const constantTimeEqual = (left, right) => {
+  if (typeof left !== 'string' || typeof right !== 'string') return false;
+
+  let mismatch = left.length ^ right.length;
+  const maxLength = Math.max(left.length, right.length);
+
+  for (let index = 0; index < maxLength; index += 1) {
+    mismatch |= (left.charCodeAt(index) || 0) ^ (right.charCodeAt(index) || 0);
+  }
+
+  return mismatch === 0;
+};
 
 function Main() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -59,7 +73,7 @@ function Main() {
       } else {
         // User is signed out from Firebase
         const currentToken = localStorage.getItem('access_token');
-        if (currentToken === 'guest-token') {
+        if (constantTimeEqual(currentToken, 'guest-token')) {
           console.log('Keeping guest session active');
           // Ensure user state is persistent on reload if token exists
           if (!user) {
@@ -149,7 +163,7 @@ function Main() {
     await firebaseAuth.signOut(); // Sign out from Firebase
     setIsAuthenticated(false);
     setUser(null);
-    window.location.href = "/";
+    safeRedirect("/");
   };
 
   const ProtectedRoute = ({ children }) => {

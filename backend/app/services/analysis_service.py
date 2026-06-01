@@ -1,6 +1,6 @@
 from typing import List, Dict, Any, Optional
 from ..repositories.analysis_repository import AnalysisRepository
-from ..core.exceptions import NotFoundError, DatabaseError, ValidationError
+from ..core.exceptions import DatabaseError, ValidationError
 from ..schemas.schemas import AnalysisCreate, Analysis
 
 

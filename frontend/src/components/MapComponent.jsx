@@ -113,6 +113,218 @@ const calculateZoomFromRadius = (latitude, radiusMeters, mapWidthPx) => {
   }
 };
 
+const CUSTOM_MARKER_CSS = `
+  @keyframes pulse {
+    0%, 100% {
+      transform: scale(0.95);
+      opacity: 0.3;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.7;
+    }
+  }
+  .leaflet-div-icon {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .leaflet-popup-content-wrapper {
+    background: #000000 !important;
+    color: #ffffff !important;
+    border: 1px solid #333333 !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+    padding: 0 !important;
+  }
+  .leaflet-popup-tip {
+    background: #000000 !important;
+    border: 1px solid #333333 !important;
+  }
+  .leaflet-popup-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    background: #000000 !important;
+    color: #ffffff !important;
+  }
+`;
+
+const setStyles = (element, styles) => {
+  Object.assign(element.style, styles);
+  return element;
+};
+
+const createElement = (tagName, styles = {}, text = '') => {
+  const element = document.createElement(tagName);
+  setStyles(element, styles);
+  if (text) element.textContent = text;
+  return element;
+};
+
+const popupShell = (minWidth = '160px') => createElement('div', {
+  background: '#000000',
+  color: '#ffffff',
+  padding: '12px',
+  borderRadius: '6px',
+  border: '1px solid #333333',
+  minWidth,
+  fontFamily: "'Inter', sans-serif",
+  lineHeight: '1.4',
+});
+
+const createLocationPopup = (title, lat, lng, minWidth = '160px') => {
+  const wrapper = popupShell(minWidth);
+  const heading = createElement('strong', {
+    color: '#ffffff',
+    fontSize: '13px',
+    display: 'block',
+    marginBottom: '4px',
+  }, title);
+  const details = createElement('div', {
+    fontSize: '11px',
+    color: '#a3a3a3',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '2px',
+  });
+
+  [
+    ['Lat:', lat.toFixed(6)],
+    ['Lng:', lng.toFixed(6)],
+  ].forEach(([label, value]) => {
+    const row = createElement('div');
+    row.append(label, ' ');
+    row.appendChild(createElement('span', {
+      color: '#ffffff',
+      fontFamily: 'monospace',
+    }, value));
+    details.appendChild(row);
+  });
+
+  wrapper.append(heading, details);
+  return wrapper;
+};
+
+const createTargetLocationPopup = (location) => {
+  const wrapper = popupShell('220px');
+  const heading = createElement('h3', {
+    margin: '0 0 8px 0',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#ffffff',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
+    paddingRight: '24px',
+  }, 'Target Location');
+  const details = createElement('div', {
+    fontSize: '11px',
+    color: '#a3a3a3',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '4px',
+    borderTop: '1px solid #333333',
+    paddingTop: '8px',
+  });
+
+  [
+    ['Lat:', location.lat.toFixed(6)],
+    ['Lng:', location.lng.toFixed(6)],
+  ].forEach(([label, value]) => {
+    const row = createElement('div', {
+      display: 'flex',
+      justifyContent: 'space-between',
+    });
+    row.appendChild(createElement('span', {}, label));
+    row.appendChild(createElement('span', {
+      color: '#ffffff',
+      fontFamily: 'monospace',
+    }, value));
+    details.appendChild(row);
+  });
+
+  wrapper.append(heading, details);
+  return wrapper;
+};
+
+const createCompetitorPopup = (competitor) => {
+  const wrapper = popupShell('220px');
+  const heading = createElement('h3', {
+    margin: '0 0 8px 0',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#ffffff',
+    lineHeight: '1.4',
+    paddingRight: '24px',
+  }, competitor.name || 'Unnamed competitor');
+  const meta = createElement('div', {
+    display: 'flex',
+    gap: '12px',
+    marginBottom: '6px',
+  });
+  const rating = createElement('div', {
+    fontSize: '12px',
+    color: '#e5e5e5',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+  });
+
+  rating.appendChild(createElement('span', { color: '#f59e0b' }, 'Rating'));
+  rating.appendChild(createElement('span', {}, competitor.rating > 0 ? String(competitor.rating) : 'N/A'));
+  rating.appendChild(createElement('span', {
+    color: '#737373',
+    fontSize: '10px',
+  }, `(${competitor.user_ratings_total || 0})`));
+  meta.appendChild(rating);
+  meta.appendChild(createElement('div', {
+    fontSize: '12px',
+    color: '#a3a3a3',
+  }, '$'.repeat(competitor.price_level || 1)));
+
+  const address = createElement('div', {
+    fontSize: '11px',
+    color: '#a3a3a3',
+    marginTop: '8px',
+    borderTop: '1px solid #333333',
+    paddingTop: '8px',
+    lineHeight: '1.4',
+  }, competitor.vicinity || 'Address not available');
+
+  wrapper.append(heading, meta, address);
+  return wrapper;
+};
+
+const createFallbackMap = () => {
+  const fallback = createElement('div', {
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(45deg, #fef3c7 25%, transparent 25%), linear-gradient(-45deg, #fef3c7 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #fef3c7 75%), linear-gradient(-45deg, transparent 75%, #fef3c7 75%)',
+    backgroundSize: '20px 20px',
+    backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    cursor: 'crosshair',
+    color: '#1f2937',
+    fontFamily: 'Arial, sans-serif',
+  });
+  const panel = createElement('div', {
+    textAlign: 'center',
+    background: 'rgba(255,255,255,0.9)',
+    padding: '20px',
+    borderRadius: '8px',
+    border: '2px solid #fbbf24',
+  });
+  panel.appendChild(createElement('h3', { color: '#1f2937' }, 'Click to Select Location'));
+  panel.appendChild(createElement('p', {
+    fontSize: '14px',
+    color: '#6b7280',
+  }, 'Map tiles unavailable - using fallback mode'));
+  fallback.appendChild(panel);
+  return fallback;
+};
+
 const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, buildingWidth, competitors = [] }) => {
   const [mapLoaded, setMapLoaded] = useState(false);
   const mapRef = useRef(null);
@@ -127,41 +339,7 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
       style.id = 'leaflet-custom-marker-styles';
       document.head.appendChild(style);
     }
-    style.innerHTML = `
-      @keyframes pulse {
-        0%, 100% {
-          transform: scale(0.95);
-          opacity: 0.3;
-        }
-        50% {
-          transform: scale(1.2);
-          opacity: 0.7;
-        }
-      }
-      .leaflet-div-icon {
-        background: transparent !important;
-        border: none !important;
-        box-shadow: none !important;
-      }
-      .leaflet-popup-content-wrapper {
-        background: #000000 !important;
-        color: #ffffff !important;
-        border: 1px solid #333333 !important;
-        border-radius: 6px !important;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
-        padding: 0 !important;
-      }
-      .leaflet-popup-tip {
-        background: #000000 !important;
-        border: 1px solid #333333 !important;
-      }
-      .leaflet-popup-content {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: #000000 !important;
-        color: #ffffff !important;
-      }
-    `;
+    style.textContent = CUSTOM_MARKER_CSS;
   }, []);
 
   // Get user's current location (non-blocking)
@@ -259,15 +437,7 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
             // Add blue marker for user's current location
             L.marker([userLocation.lat, userLocation.lng], { icon: blueMarkerIcon })
               .addTo(map)
-              .bindPopup(`
-                <div style="background: #000000; color: #ffffff; padding: 12px; border-radius: 6px; font-family: 'Inter', sans-serif; line-height: 1.4; border: 1px solid #333333; min-width: 160px;">
-                  <strong style="color: #ffffff; font-size: 13px; display: block; margin-bottom: 4px;">Your Current Location</strong>
-                  <div style="font-size: 11px; color: #a3a3a3; display: flex; flex-direction: column; gap: 2px;">
-                    <div>Lat: <span style="color: #ffffff; font-family: monospace;">${userLocation.lat.toFixed(6)}</span></div>
-                    <div>Lng: <span style="color: #ffffff; font-family: monospace;">${userLocation.lng.toFixed(6)}</span></div>
-                  </div>
-                </div>
-              `)
+              .bindPopup(createLocationPopup('Your Current Location', userLocation.lat, userLocation.lng))
               .openPopup();
           })
           .catch((error) => {
@@ -328,15 +498,7 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
           // Add red marker for selected location
           L.marker([lat, lng], { icon: redMarkerIcon })
             .addTo(map)
-            .bindPopup(`
-              <div style="background: #000000; color: #ffffff; padding: 12px; border-radius: 6px; font-family: 'Inter', sans-serif; line-height: 1.4; border: 1px solid #333333; min-width: 160px;">
-                <strong style="color: #ffffff; font-size: 13px; display: block; margin-bottom: 4px;">Selected Location</strong>
-                <div style="font-size: 11px; color: #a3a3a3; display: flex; flex-direction: column; gap: 2px;">
-                  <div>Lat: <span style="color: #ffffff; font-family: monospace;">${lat.toFixed(6)}</span></div>
-                  <div>Lng: <span style="color: #ffffff; font-family: monospace;">${lng.toFixed(6)}</span></div>
-                </div>
-              </div>
-            `)
+            .bindPopup(createLocationPopup('Selected Location', lat, lng))
             .openPopup();
         });
 
@@ -357,29 +519,7 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
         // Create a fallback clickable area
         const container = document.getElementById('business-map');
         if (container) {
-          container.innerHTML = `
-            <div style="
-              width: 100%;
-              height: 100%;
-              background: linear-gradient(45deg, #fef3c7 25%, transparent 25%),
-                          linear-gradient(-45deg, #fef3c7 25%, transparent 25%),
-                          linear-gradient(45deg, transparent 75%, #fef3c7 75%),
-                          linear-gradient(-45deg, transparent 75%, #fef3c7 75%);
-              background-size: 20px 20px;
-              background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
-              display: flex;
-              align-items: center;
-              justify-content: center;
-              cursor: crosshair;
-              color: #1f2937;
-              font-family: Arial, sans-serif;
-            ">
-              <div style="text-align: center; background: rgba(255,255,255,0.9); padding: 20px; border-radius: 8px; border: 2px solid #fbbf24;">
-                <h3 style="color: #1f2937;">Click to Select Location</h3>
-                <p style="font-size: 14px; color: #6b7280;">Map tiles unavailable - using fallback mode</p>
-              </div>
-            </div>
-          `;
+          container.replaceChildren(createFallbackMap());
 
           container.onclick = (e) => {
             const rect = container.getBoundingClientRect();
@@ -440,21 +580,7 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
       // Add new marker
       L.marker([selectedLocation.lat, selectedLocation.lng], { icon: redMarkerIcon })
         .addTo(mapInstanceRef.current)
-        .bindPopup(`
-            <div style="background-color: #000000; color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #333333; min-width: 220px; font-family: 'Inter', sans-serif;">
-              <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #ffffff; display: flex; align-items: center; gap: 6px; padding-right: 24px;">
-                 Target Location
-              </h3>
-              <div style="font-size: 11px; color: #a3a3a3; display: flex; flex-direction: column; gap: 4px; border-top: 1px solid #333333; padding-top: 8px;">
-                <div style="display: flex; justify-content: space-between;">
-                  <span>Lat:</span> <span style="color: #ffffff; font-family: monospace;">${selectedLocation.lat.toFixed(6)}</span>
-                </div>
-                <div style="display: flex; justify-content: space-between;">
-                  <span>Lng:</span> <span style="color: #ffffff; font-family: monospace;">${selectedLocation.lng.toFixed(6)}</span>
-                </div>
-              </div>
-            </div>
-        `, { autoClose: false, closeOnClick: false, className: 'custom-popup' })
+        .bindPopup(createTargetLocationPopup(selectedLocation), { autoClose: false, closeOnClick: false, className: 'custom-popup' })
         .openPopup();
 
       // Add circle overlay for radius visualization if radius > 0
@@ -497,24 +623,7 @@ const MapComponent = ({ onLocationSelect, selectedLocation, onMapReady, building
 
         const marker = L.marker([comp.lat, comp.lng], { icon })
           .addTo(mapInstanceRef.current)
-          .bindPopup(`
-            <div style="background-color: #000000; color: #ffffff; padding: 12px; border-radius: 6px; border: 1px solid #333333; min-width: 220px; font-family: 'Inter', sans-serif;">
-              <h3 style="margin: 0 0 8px 0; font-size: 14px; font-weight: 600; color: #ffffff; line-height: 1.4; padding-right: 24px;">${comp.name}</h3>
-              <div style="display: flex; gap: 12px; margin-bottom: 6px;">
-                <div style="font-size: 12px; color: #e5e5e5; display: flex; align-items: center; gap: 4px;">
-                  <span style="color: #f59e0b;">Rating</span> 
-                  <span>${comp.rating > 0 ? comp.rating : 'N/A'}</span>
-                  <span style="color: #737373; font-size: 10px;">(${comp.user_ratings_total})</span>
-                </div>
-                <div style="font-size: 12px; color: #a3a3a3;">
-                  ${'$'.repeat(comp.price_level || 1)}
-                </div>
-              </div>
-              <div style="font-size: 11px; color: #a3a3a3; margin-top: 8px; border-top: 1px solid #333333; padding-top: 8px; line-height: 1.4;">
-                ${comp.vicinity || 'Address not available'}
-              </div>
-            </div>
-          `, { className: 'custom-popup' });
+          .bindPopup(createCompetitorPopup(comp), { className: 'custom-popup' });
         
         window.competitorLayers.push(marker);
       });

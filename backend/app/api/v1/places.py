@@ -12,14 +12,14 @@ async def get_competitors(
     lng: float,
     radius: int = 1000,
     keyword: Optional[str] = "food",
-    type: Optional[str] = None,
+    place_type: Optional[str] = Query(default=None, alias="type"),
     current_user: User = Depends(get_current_user)
 ):
     """
     Get nearby competitors using Google Places API.
     """
     try:
-        competitors = await places_service.search_nearby(lat, lng, radius, keyword, type)
+        competitors = await places_service.search_nearby(lat, lng, radius, keyword, place_type)
         return competitors
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

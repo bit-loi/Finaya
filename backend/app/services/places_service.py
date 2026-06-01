@@ -1,6 +1,6 @@
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
+from secrets import choice, randbelow
 import httpx
-from fastapi import HTTPException
 from app.core.config import settings
 
 class PlacesService:
@@ -12,7 +12,7 @@ class PlacesService:
         lng: float, 
         radius: int = 1000, 
         keyword: str = "food",
-        type: str = None
+        place_type: str = None
     ) -> List[Dict[str, Any]]:
         """
         Search for nearby places using Google Places API
@@ -30,8 +30,8 @@ class PlacesService:
             }
             if keyword:
                 params["keyword"] = keyword
-            if type:
-                params["type"] = type
+            if place_type:
+                params["type"] = place_type
 
             try:
                 response = await client.get(f"{self.BASE_URL}/nearbysearch/json", params=params)
@@ -69,26 +69,25 @@ class PlacesService:
         """
         Generates realistic dummy competitors around the location for demo/fallback.
         """
-        import random
         competitors = []
         types = ["Cafe", "Restaurant", "Retail", "Coffee Shop"]
         names = ["Kopi Kenangan", "Janji Jiwa", "Starbucks", "Indomaret", "Alfamart", "Local Warung", "Fancy Bistro"]
         
         for i in range(5):
-            # Random offset
-            lat_offset = (random.random() - 0.5) * 0.005
-            lng_offset = (random.random() - 0.5) * 0.005
+            # Demo-only jitter using OS-backed randomness.
+            lat_offset = ((randbelow(10001) / 10000) - 0.5) * 0.005
+            lng_offset = ((randbelow(10001) / 10000) - 0.5) * 0.005
             
             competitors.append({
                 "id": f"dummy_{i}",
-                "name": f"{random.choice(names)} {random.randint(1, 100)}",
+                "name": f"{choice(names)} {randbelow(100) + 1}",
                 "lat": lat + lat_offset,
                 "lng": lng + lng_offset,
-                "rating": round(random.uniform(3.0, 5.0), 1),
-                "user_ratings_total": random.randint(10, 500),
+                "rating": round(3.0 + (randbelow(21) / 10), 1),
+                "user_ratings_total": randbelow(491) + 10,
                 "vicinity": "Nearby St.",
-                "price_level": random.randint(1, 4),
-                "types": [random.choice(types).lower()]
+                "price_level": randbelow(4) + 1,
+                "types": [choice(types).lower()]
             })
         return competitors
 

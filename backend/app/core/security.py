@@ -3,7 +3,6 @@ Security utilities for input validation, sanitization, and key management.
 (Authentication is handled via Firebase in auth.py)
 """
 import re
-from typing import Optional
 from fastapi import HTTPException, status
 
 class SecurityManager:
@@ -51,5 +50,5 @@ class SecurityManager:
         try:
             user, domain = email.split('@')
             return f"{user[:1]}***@{domain}"
-        except:
+        except ValueError:
             return "invalid_email"

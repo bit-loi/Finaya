@@ -4,7 +4,7 @@ User repository for user-related database operations using MongoDB
 from typing import List, Dict, Any, Optional
 from datetime import datetime
 from .base_repository import BaseRepository
-from ..core.exceptions import DatabaseError, NotFoundError
+from ..core.exceptions import DatabaseError
 
 
 class UserRepository(BaseRepository):

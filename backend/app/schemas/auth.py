@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 from typing import Optional 
-from datetime import datetime
 
 # Auth schemas
 class Token(BaseModel):

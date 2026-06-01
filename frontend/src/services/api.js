@@ -24,6 +24,51 @@ const getBaseUrl = () => {
 
 const API_BASE_URL = getBaseUrl();
 
+const constantTimeEqual = (left, right) => {
+  if (typeof left !== 'string' || typeof right !== 'string') return false;
+
+  let mismatch = left.length ^ right.length;
+  const maxLength = Math.max(left.length, right.length);
+
+  for (let index = 0; index < maxLength; index += 1) {
+    const leftCode = left.charCodeAt(index) || 0;
+    const rightCode = right.charCodeAt(index) || 0;
+    mismatch |= leftCode ^ rightCode;
+  }
+
+  return mismatch === 0;
+};
+
+const isGuestToken = (token) => constantTimeEqual(token, 'guest-token');
+
+const createGuestId = () => {
+  const cryptoApi = globalThis.crypto;
+
+  if (cryptoApi?.randomUUID) {
+    return `guest_${cryptoApi.randomUUID()}`;
+  }
+
+  if (cryptoApi?.getRandomValues) {
+    const bytes = new Uint8Array(16);
+    cryptoApi.getRandomValues(bytes);
+    return `guest_${Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')}`;
+  }
+
+  return `guest_${Date.now()}`;
+};
+
+const secureDemoNumber = (maxExclusive) => {
+  const cryptoApi = globalThis.crypto;
+
+  if (cryptoApi?.getRandomValues) {
+    const value = new Uint32Array(1);
+    cryptoApi.getRandomValues(value);
+    return value[0] / 2 ** 32 * maxExclusive;
+  }
+
+  return Date.now() % maxExclusive;
+};
+
 // Create axios instance
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -50,7 +95,7 @@ api.interceptors.request.use(
     
     // Fallback to localStorage token (for backward compatibility)
     const token = localStorage.getItem('access_token');
-    if (token && token.trim() && token !== 'guest-token') {
+    if (token && token.trim() && !isGuestToken(token)) {
       config.headers.Authorization = `Bearer ${token}`;
     }
     
@@ -118,7 +163,7 @@ export const authAPI = {
   getCurrentUser: async () => {
     // Check for guest mode - skip API call
     const token = localStorage.getItem('access_token');
-    if (token === 'guest-token') {
+    if (isGuestToken(token)) {
       logger.log('Guest mode: Skipping getCurrentUser API call');
       return null;
     }
@@ -191,13 +236,13 @@ export const analysisAPI = {
   save: async (analysisData) => {
     // Check for guest mode
     const token = localStorage.getItem('access_token');
-    if (token === 'guest-token') {
+    if (isGuestToken(token)) {
       logger.log('Guest mode: Saving to localStorage');
       const savedAnalyses = JSON.parse(localStorage.getItem('guest_analyses') || '[]');
       
       const newAnalysis = {
         ...analysisData,
-        id: `guest_${Date.now()}`,
+        id: createGuestId(),
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         user_id: 'guest_user_123'
@@ -217,7 +262,7 @@ export const analysisAPI = {
   getAll: async (offset = 0, limit = 10) => {
     // Check for guest mode
     const token = localStorage.getItem('access_token');
-    if (token === 'guest-token') {
+    if (isGuestToken(token)) {
        logger.log('Guest mode: Fetching from localStorage');
        const savedAnalyses = JSON.parse(localStorage.getItem('guest_analyses') || '[]');
        
@@ -245,7 +290,7 @@ export const analysisAPI = {
   getById: async (analysisId) => {
     // Check for guest mode
     const token = localStorage.getItem('access_token');
-    if (token === 'guest-token') {
+    if (isGuestToken(token)) {
         const savedAnalyses = JSON.parse(localStorage.getItem('guest_analyses') || '[]');
         const analysis = savedAnalyses.find(a => a.id === analysisId);
         if (!analysis) throw new Error("Analysis not found");
@@ -260,7 +305,7 @@ export const analysisAPI = {
   update: async (analysisId, updateData) => {
       // Check for guest mode
     const token = localStorage.getItem('access_token');
-    if (token === 'guest-token') {
+    if (isGuestToken(token)) {
         const savedAnalyses = JSON.parse(localStorage.getItem('guest_analyses') || '[]');
         const index = savedAnalyses.findIndex(a => a.id === analysisId);
         
@@ -284,7 +329,7 @@ export const analysisAPI = {
   delete: async (analysisId) => {
     // Check for guest mode
     const token = localStorage.getItem('access_token');
-    if (token === 'guest-token') {
+    if (isGuestToken(token)) {
         let savedAnalyses = JSON.parse(localStorage.getItem('guest_analyses') || '[]');
         savedAnalyses = savedAnalyses.filter(a => a.id !== analysisId);
         localStorage.setItem('guest_analyses', JSON.stringify(savedAnalyses));
@@ -302,7 +347,7 @@ export const agentAPI = {
     
     // Check for guest mode to log but proceed
     const token = localStorage.getItem('access_token');
-    if (token === 'guest-token') {
+    if (isGuestToken(token)) {
       logger.log('Guest mode: AI Advisor accessed anonymously');
     }
     
@@ -374,8 +419,8 @@ export const placesAPI = {
           }
           
           // Simulate rating for demo purposes since Overpass doesn't provide it
-          const simulatedRating = (3.5 + Math.random() * 1.4).toFixed(1); // 3.5 - 4.9
-          const simulatedReviews = Math.floor(Math.random() * 300) + 5;
+          const simulatedRating = (3.5 + secureDemoNumber(1.4)).toFixed(1); // 3.5 - 4.9
+          const simulatedReviews = Math.floor(secureDemoNumber(300)) + 5;
           
           return {
             lat: latitude,

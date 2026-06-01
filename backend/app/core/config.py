@@ -1,5 +1,7 @@
 from pydantic_settings import BaseSettings
+from pydantic import Field
 from typing import List
+from secrets import token_urlsafe
 
 class Settings(BaseSettings):
     # Application
@@ -31,7 +33,7 @@ class Settings(BaseSettings):
     GOOGLE_SEARCH_CX: str = ""      # Programmable Search Engine ID
 
     # Security
-    SECRET_KEY: str = "default_unsafe_secret_key_for_dev_only"
+    SECRET_KEY: str = Field(default_factory=lambda: token_urlsafe(32))
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080
 
     # CORS
@@ -43,7 +45,7 @@ class Settings(BaseSettings):
         return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
 
     # Rate Limiting
-    REDIS_URL: str = "redis://default:eoyPRWEyCRXhxlhAEhVRKpkiEnXMqAnA@switchyard.proxy.rlwy.net:20210"
+    REDIS_URL: str = "redis://localhost:6379/0"
     RATE_LIMIT_REQUESTS: int = 100  # requests per window
     RATE_LIMIT_WINDOW: int = 60     # seconds
     AUTH_RATE_LIMIT_REQUESTS: int = 5  # auth endpoints stricter

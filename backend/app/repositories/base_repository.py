@@ -2,12 +2,14 @@
 Base repository pattern for database operations using MongoDB (Motor)
 """
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 from bson import ObjectId
 from ..core.database import get_mongodb
 
 class BaseRepository(ABC):
     """Abstract base repository for database operations with MongoDB"""
+
+    FORBIDDEN_FIELD_NAMES = {"__proto__", "constructor", "prototype"}
     
     def __init__(self, collection_name: str):
         self.collection_name = collection_name
@@ -24,9 +26,33 @@ class BaseRepository(ABC):
         doc['id'] = str(doc.pop('_id'))
         return doc
 
+    def _validate_field_name(self, field: str) -> str:
+        """Reject field names that can trigger Mongo operator or prototype injection."""
+        if (
+            not isinstance(field, str)
+            or not field
+            or field.startswith("$")
+            or "." in field
+            or field in self.FORBIDDEN_FIELD_NAMES
+        ):
+            raise ValueError("Invalid field name")
+        return field
+
+    def _sanitize_document(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Validate all document keys before using them in MongoDB operations."""
+        sanitized = {}
+        for key, value in data.items():
+            safe_key = self._validate_field_name(key)
+            if isinstance(value, dict):
+                sanitized[safe_key] = self._sanitize_document(value)
+            else:
+                sanitized[safe_key] = value
+        return sanitized
+
     async def create(self, data: Dict[str, Any], doc_id: Optional[str] = None) -> Optional[Dict[str, Any]]:
         """Create a new record"""
         try:
+            data = self._sanitize_document(data)
             if doc_id:
                 data['_id'] = doc_id
                 
@@ -44,8 +70,8 @@ class BaseRepository(ABC):
             if not doc:
                 try:
                     doc = await self.collection.find_one({"_id": ObjectId(record_id)})
-                except:
-                    pass
+                except Exception:
+                    doc = None
             return self._doc_to_dict(doc)
         except Exception as e:
             raise Exception(f"Failed to get {self.collection_name} by ID: {str(e)}")
@@ -53,6 +79,7 @@ class BaseRepository(ABC):
     async def get_by_field(self, field: str, value: Any) -> Optional[Dict[str, Any]]:
         """Get single record by field value"""
         try:
+            field = self._validate_field_name(field)
             doc = await self.collection.find_one({field: value})
             return self._doc_to_dict(doc)
         except Exception as e:
@@ -61,7 +88,8 @@ class BaseRepository(ABC):
     async def get_all(self, filters: Optional[Dict[str, Any]] = None, limit: int = 100, offset: int = 0, order_by: str = "created_at", descending: bool = True) -> List[Dict[str, Any]]:
         """Get all records with optional filters"""
         try:
-            query_filters = filters or {}
+            query_filters = self._sanitize_document(filters or {})
+            order_by = self._validate_field_name(order_by) if order_by else order_by
             cursor = self.collection.find(query_filters)
             
             if order_by:
@@ -77,6 +105,7 @@ class BaseRepository(ABC):
     async def update(self, record_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Update record by ID"""
         try:
+            data = self._sanitize_document(data)
             # Try update with string ID or ObjectId
             query = {"_id": record_id}
             result = await self.collection.update_one(query, {"$set": data})
@@ -85,8 +114,8 @@ class BaseRepository(ABC):
                 try:
                     query = {"_id": ObjectId(record_id)}
                     await self.collection.update_one(query, {"$set": data})
-                except:
-                    pass
+                except Exception:
+                    query = {"_id": record_id}
                     
             updated_doc = await self.collection.find_one(query)
             return self._doc_to_dict(updated_doc)
@@ -103,8 +132,8 @@ class BaseRepository(ABC):
                 try:
                     query = {"_id": ObjectId(record_id)}
                     await self.collection.delete_one(query)
-                except:
-                    pass
+                except Exception:
+                    return False
             return True
         except Exception as e:
             raise Exception(f"Failed to delete {self.collection_name}: {str(e)}")

@@ -1,10 +1,9 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from typing import Dict, Any, List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from ...services.agent_service import get_finaya_agent
 from ...schemas.schemas import User
-from .auth import get_current_user, get_current_user_optional
-import json
+from .auth import get_current_user_optional
 
 router = APIRouter()
 
@@ -15,7 +14,7 @@ class ChatMessage(BaseModel):
 class AdvisorRequest(BaseModel):
     query: str
     context_data: Dict[str, Any]
-    history: List[ChatMessage] = []
+    history: List[ChatMessage] = Field(default_factory=list)
     user_id: Optional[str] = None
 
 class ExplorationRequest(BaseModel):

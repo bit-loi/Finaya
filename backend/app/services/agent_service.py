@@ -1,13 +1,10 @@
 import json
-import base64
+import logging
 import httpx
-from typing import Dict, Any, List, Optional, Tuple
-from fastapi import HTTPException
+from typing import Dict, Any, List, Optional
 from app.core.config import settings
-from .gemini_service_analysis import analyze_location_image, calculate_business_metrics, reverse_geocode
 
-from google import genai
-from google.genai import types
+logger = logging.getLogger(__name__)
 
 class FinayaAgent:
     def __init__(self):
@@ -171,9 +168,11 @@ class FinayaAgent:
         except Exception as e:
             return {"error": str(e)}
 
-    async def run_advisor_task(self, query: str, context_data: Dict[str, Any], history: List[Any] = [], user_id: Optional[str] = None) -> str:
+    async def run_advisor_task(self, query: str, context_data: Dict[str, Any], history: Optional[List[Any]] = None, user_id: Optional[str] = None) -> str:
         if not self.client:
              return "I apologize, but I am currently disabled because the AI Engine API Key is missing."
+
+        history = history or []
 
         # 0. Fetch User History Context
         user_history_context = ""
@@ -187,8 +186,8 @@ class FinayaAgent:
                     for a in analyses[:3]:
                          summary_list.append(f"- {a.name}: Score {a.data.get('metrics', {}).get('locationScore', 'N/A')}")
                     user_history_context = "\nUSER'S PAST ANALYSES:\n" + "\n".join(summary_list)
-            except Exception:
-                pass
+            except Exception as exc:
+                logger.warning("Failed to load user analysis history: %s", exc)
 
         # 1. Perform Web Search
         search_query = f"{query} {context_data.get('location_name', '')}"
@@ -262,7 +261,8 @@ class FinayaAgent:
                 config=types.GenerateContentConfig(response_mime_type="application/json")
             )
             return json.loads(response.text)
-        except:
+        except Exception as exc:
+            logger.warning("Autonomous search suggestion failed: %s", exc)
             return []
 
 # Lazy singleton instance (not initialized at import time)

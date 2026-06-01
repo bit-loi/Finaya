@@ -3,9 +3,7 @@ User service layer for business logic
 """
 from firebase_admin import auth as firebase_auth
 from typing import Optional, Dict, Any
-from datetime import datetime, timedelta
 from ..repositories.user_repository import UserRepository
-from ..core.security import SecurityManager
 from ..core.exceptions import AuthenticationError, ValidationError, DatabaseError
 from ..schemas.schemas import UserCreate, User
 
@@ -34,12 +32,8 @@ class UserService:
             
             if not user:
                 # Create user automatically if it's their first time via Google/Firebase
-                # We use a placeholder hash because auth is handled by Firebase
-                password_hash = "firebase_managed_account"
-                
                 user = await self.user_repo.create_user(
                     email=email,
-                    password_hash=password_hash,
                     full_name=name,
                     uid=uid
                 )
@@ -64,14 +58,9 @@ class UserService:
             if await self.user_repo.check_email_exists(user_data.email):
                 raise ValidationError("Email already registered")
             
-            # Placeholder hash since we expect Firebase to handle this in real flow
-            # Or if this is for admin seeding
-            password_hash = "manual_registration_placeholder" 
-            
             # Create user
             db_user = await self.user_repo.create_user(
                 email=user_data.email,
-                password_hash=password_hash,
                 full_name=user_data.full_name
             )
             
@@ -98,12 +87,8 @@ class UserService:
             if not user:
                 return None
             
-            # For Firebase-managed accounts, reject password login
-            if user.get('password_hash') == 'firebase_managed_account':
-                raise AuthenticationError("This account uses Google Sign-In. Please use 'Continue with Google'.")
-            
-            # For manual accounts with placeholder, also reject
-            if user.get('password_hash') == 'manual_registration_placeholder':
+            # Password authentication is intentionally disabled for Firebase-managed accounts.
+            if not user.get('password_hash'):
                 raise AuthenticationError("Password authentication not configured for this account.")
             
             # If we had real password hashing, we'd verify here
@@ -157,8 +142,6 @@ class UserService:
         This is kept for backward compatibility with legacy endpoints.
         """
         from firebase_admin import auth as firebase_auth
-        from datetime import timedelta
-        
         # For Firebase users, we create a custom token
         # The frontend should ideally use Firebase ID tokens instead
         try:

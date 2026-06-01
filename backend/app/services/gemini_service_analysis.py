@@ -1,6 +1,7 @@
 import json
 import re
 import base64
+import logging
 import httpx
 from typing import Dict, Any
 from fastapi import HTTPException
@@ -9,6 +10,8 @@ from app.core.config import settings
 from app.schemas.schemas import AreaDistribution
 from app.services.traffic_probability import probabilistic_traffic
 from app.services.weather_probability import apply_weather_to_apt
+
+logger = logging.getLogger(__name__)
 
 NOMINATIM_BASE_URL = "https://nominatim.openstreetmap.org/reverse"
 
@@ -62,7 +65,8 @@ async def _web_search_density(location_name: str) -> str:
         from app.services.agent_service import get_finaya_agent
         query = f"population density statistics demographics {location_name} site:citypopulation.de OR site:bps.go.id OR site:wikipedia.org"
         return await get_finaya_agent()._web_search(query)
-    except:
+    except Exception as exc:
+        logger.warning("Density web search failed: %s", exc)
         return "No external density data available."
 
 async def analyze_location_image(
@@ -75,7 +79,8 @@ async def analyze_location_image(
         center_lat = image_metadata.get('center', {}).get('lat')
         center_lng = image_metadata.get('center', {}).get('lng')
         location_name = await reverse_geocode(center_lat, center_lng)
-    except:
+    except (AttributeError, TypeError, ValueError) as exc:
+        logger.warning("Could not resolve image metadata location: %s", exc)
         location_name = "Unknown Location"
 
     # 2. Search for Ground Truth Data (RAG)

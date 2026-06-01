@@ -1,12 +1,11 @@
-from typing import Callable, Type, Any, Optional, Dict
-from functools import lru_cache
+from typing import Type, Any, Optional, Dict
 from contextlib import asynccontextmanager
+from hmac import compare_digest
 import logging
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 
 from .database import Database
-from .config import settings
 from .security import SecurityManager
 from ..repositories.base_repository import BaseRepository
 from ..repositories.analysis_repository import AnalysisRepository
@@ -135,7 +134,7 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
 async def get_current_user(token: str = Depends(oauth2_scheme)) -> Dict[str, Any]:
     """Get current authenticated user from JWT token"""
     try:
-        if token == "guest-token":
+        if compare_digest(token, "guest-token"):
             from datetime import datetime
             return User(
                 id="guest_user_123",

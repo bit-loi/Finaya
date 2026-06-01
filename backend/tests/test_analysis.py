@@ -100,8 +100,8 @@ def test_calculate_analysis(mocker):
         competitor_density_estimate="high", reasoning=""
     )
     
-    # In analysis.py `calculate_analysis` expects a tuple (area_distribution, raw_response)
-    mock_analyze.return_value = (dummy_area, "raw text")
+    # In analysis.py `calculate_analysis` expects an AreaDistribution object
+    mock_analyze.return_value = dummy_area
     mock_calc.return_value = {"monthlyRevenue": 20000000, "locationScore": 7.0}
     mock_geocode.return_value = "Test City"
     

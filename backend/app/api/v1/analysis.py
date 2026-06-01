@@ -103,7 +103,7 @@ async def calculate_analysis(
 ):
     """Perform full business analysis calculation and save to DB"""
     try:
-        area_distribution, raw_response = await analyze_location_image(
+        area_distribution = await analyze_location_image(
             request.screenshot_base64,
             request.screenshot_metadata
         )
@@ -120,7 +120,7 @@ async def calculate_analysis(
         try:
             lat, lon = map(float, request.location.split(","))
             location_name = await reverse_geocode(lat, lon)
-        except:
+        except (TypeError, ValueError):
             location_name = request.location  # Fallback to original if parsing fails
 
         analysis_data = {
@@ -190,7 +190,7 @@ async def analyze_only(
         try:
             lat, lon = map(float, request.location.split(","))
             location_name = await reverse_geocode(lat, lon)
-        except:
+        except (TypeError, ValueError):
             location_name = request.location  # Fallback to original if parsing fails
 
         return {
