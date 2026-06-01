@@ -19,10 +19,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Python 3.10
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@8d9ed9ac5c53483de85588cdf95a591a75ab9f55 # v5.5.0
         with:
           python-version: "3.10"
           cache: pip
@@ -57,10 +57,10 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up Node.js 18
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: 18
           cache: npm
@@ -75,7 +75,8 @@ jobs:
         run: npm run build
 
   # ──────────────────────────────────────
-  # Docker Build Verification
+  # Docker Build Verification (backend only)
+  # Frontend has no Dockerfile yet — skipped
   # ──────────────────────────────────────
   docker-build:
     name: Docker Build Check
@@ -84,10 +85,45 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Build backend image
         run: docker build -t finaya-backend ./backend
 
-      - name: Build frontend image
-        run: docker build -t finaya-frontend ./frontend
+  # ──────────────────────────────────────
+  # Deploy Backend to Render (Staging)
+  # Runs only on push to main
+  # Requires GitHub environment: staging
+  # Secrets required in that environment:
+  #   DOCKERHUB_USERNAME, DOCKERHUB_TOKEN,
+  #   RENDER_STAGING_DEPLOY_HOOK
+  # ──────────────────────────────────────
+  deploy-backend-staging:
+    name: Deploy Backend to Render Staging
+    runs-on: ubuntu-latest
+    needs: [docker-build]
+
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    environment: staging
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # v3.4.0
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build backend Docker image
+        run: |
+          docker build -t ${{ secrets.DOCKERHUB_USERNAME }}/finaya-backend:staging ./backend
+
+      - name: Push backend Docker image to Docker Hub
+        run: |
+          docker push ${{ secrets.DOCKERHUB_USERNAME }}/finaya-backend:staging
+
+      - name: Trigger Render Staging Deploy
+        run: |
+          curl -fsS "${{ secrets.RENDER_STAGING_DEPLOY_HOOK }}&imgURL=docker.io/${{ secrets.DOCKERHUB_USERNAME }}/finaya-backend:staging"
