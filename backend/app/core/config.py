@@ -37,12 +37,12 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 10080
 
     # CORS
-    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:5174,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5174,http://localhost:8000,https://finaya.vercel.app"
+    CORS_ORIGINS: str = "http://localhost:5173,http://localhost:5174,http://localhost:3000,http://127.0.0.1:5173,http://127.0.0.1:5174,http://localhost:8000,https://finaya.vercel.app,https://finaya-l5f6jb5id-jbl.vercel.app,https://finaya-production-production.up.railway.app"
     
     @property
     def cors_origins_list(self) -> List[str]:
         """Parse CORS_ORIGINS string into a list"""
-        return [origin.strip() for origin in self.CORS_ORIGINS.split(",")]
+        return [origin.strip().strip("'\"") for origin in self.CORS_ORIGINS.split(",")]
 
     # Rate Limiting
     REDIS_URL: str = "redis://localhost:6379/0"
