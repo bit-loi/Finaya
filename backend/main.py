@@ -71,15 +71,18 @@ app = FastAPI(
 )
 
 # Middleware Configuration
-# 1. SlowAPI Middleware (Runs AFTER CORS because it's added first in stack logic if we add CORS last?)
-# Wait, FastAPI add_middleware adds to the TOP.
-# So if we want CORS to be TOP (run first), we add it LAST.
-# If we want SlowAPI to run AFTER CORS, we add it BEFORE CORS.
+# FastAPI add_middleware adds to the TOP of the stack (reverse order of addition).
+# To make CORSMiddleware the outermost middleware (running first for requests, last for responses),
+# it must be added last. This ensures preflight OPTIONS requests are handled correctly.
 
-# Add SlowAPI Middleware
+# 1. Add SlowAPI Middleware
 app.add_middleware(SlowAPIMiddleware)
 
-# 2. CORS Configuration - Added LAST so it runs FIRST (outermost)
+# 2. OPTIONS Middleware - Skip/pass processing for OPTIONS requests
+# Added before CORSMiddleware so CORSMiddleware wraps it
+app.add_middleware(OptionsMiddleware)
+
+# 3. CORS Configuration - Added LAST so it runs FIRST (outermost)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,  # ✅ Use parsed list from settings
@@ -87,10 +90,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# 3. OPTIONS Middleware - Added LAST to run FIRST (Skip all processing for OPTIONS)
-# This ensures preflight requests don't hit rate limiting or other middleware
-app.add_middleware(OptionsMiddleware)
 
 # Health Check
 @app.get("/health")
