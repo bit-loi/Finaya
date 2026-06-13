@@ -2,7 +2,7 @@ import axios from 'axios';
 import logger from '../utils/logger';
 
 const getBaseUrl = () => {
-  let url = import.meta.env.VITE_API_BASE_URL || 'https://finaya-production-f6f2.up.railway.app/api/v1';
+  let url = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1';
   
   // Check if we are in production (Vercel) but using localhost
   if (import.meta.env.PROD && url.includes('localhost')) {
