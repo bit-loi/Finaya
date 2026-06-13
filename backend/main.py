@@ -86,7 +86,7 @@ app.add_middleware(OptionsMiddleware)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origins_list,  # ✅ Use parsed list from settings
-    allow_credentials=False, # As requested for Bearer auth
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
